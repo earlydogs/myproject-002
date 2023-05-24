@@ -1,0 +1,220 @@
+あなたはWebアプリのエンジニアであり、かなりの実績と知見を併せ持つ経験者です。私はWebアプリを開発中で、あなたは私からの問いに答えます。
+
+私たちプロジェクトチームは以下のようなWebアプリを開発しています。私はフロントエンド（React）の開発責任者で、バックエンド（Python）は別の担当者が開発しています。
+まず、処理の流れを理解してください。
+
+# 処理の流れ
+- ユーザはブラウザでローカルから画像ファイルを選択する（もしくは、カメラを起動して写真をとる）
+- 選択された画像がバックエンドサーバーにAPIを通じて送信される。
+- バックエンドサーバーは画像を認識して、画像内の文字列の領域を認識し、その座標の情報を返す。文字列の領域が複数あると認識された場合は、複数の座標情報を返す。
+- フロントエンドで、選択された画像と、その画像の上に認識された領域を示す座標をボックスで表示する。
+
+わたしは、これからフロントエンドの実装について、あなたに質問します。バックエンドとの通信の部分や、バックエンドそのものの実装は今は行いません。理解と、質問に答える準備ができましたか？
+
+ありがとうございます。では、質問します。
+現在、私は1つ目の処理の「ローカルから画像ファイルを選択する」までの実装を終えています。
+次に、「選択された画像と、その画像の上に認識された領域を示す座標（バックエンドから返された座標データ）をボックスで表示する」を実装したいです。
+しかし、バックエンド側の処理は別の人が担当しており、まだ開発していないため、今は適当な座標のサンプルデータを使用して実装を進めたいと思います。
+記述しているコードはApp.jsで、見た目の変更はApp.cssで定義しており、それぞれ以下のとおりです。
+
+
+# App.js
+
+import React, { useState } from 'react';
+import './App.css';
+
+function App() {
+  const [image, setImage] = useState(null);
+  const [isPreviewVisible, setIsPreviewVisible] = useState(false);
+
+
+  const handleChange = (e) => {
+    const file = e.target.files[0];
+    if (!file.type.startsWith('image/')) {
+      console.error('Invalid file type selected');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      setImage(reader.result);
+      setIsPreviewVisible(true);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    const file = e.dataTransfer.files[0];
+    if (file.type.startsWith('image/')) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        setImage(reader.result);
+        setIsPreviewVisible(true);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleReset = () => {
+    setImage(null);
+    setIsPreviewVisible(false);
+  };
+
+
+  return (
+    <div className="image-uploader-container" onDragOver={(e) => e.preventDefault()} onDrop={handleDrop}>
+      <form className="image-uploader-form">
+        {!isPreviewVisible && (
+          <div className="image-select-container">
+            <label htmlFor="file-input" className="image-uploader-label">
+              <i className="material-symbols-outlined">add_photo_alternate</i>
+              <input type="file" id="file-input" onChange={handleChange} style={{ display: 'none' }} />
+            </label>
+          </div>
+        )}
+        {isPreviewVisible && (
+          <div className="image-preview-overlay">
+            <div className="image-preview-container">
+              <img src={image} alt="Selected" className="image-preview" />
+              <button type="button" onClick={handleReset} className="close-button">
+                <i className="material-icons">close</i>
+              </button>
+            </div>
+          </div>
+        )}
+      </form>
+    </div>
+  );
+
+}
+
+export default App;
+
+
+#App.css
+
+.image-uploader-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
+
+.image-uploader-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.image-uploader-label {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 20px;
+  height: 200px;
+  width: 200px;
+  cursor: pointer;
+}
+
+
+.material-symbols-outlined {
+  font-size: 70px;
+}
+
+.image-preview {
+  position: relative;
+  margin-top: 0px;
+  max-width: 100%;
+  width: auto;
+  height: auto;
+  max-height: calc(100vh - 200px);
+}
+
+
+.image-select-container {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.image-preview-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.close-button {
+  position: absolute;
+  top: 0;
+  right: 0;
+  padding: 4px;
+  background-color: rgba(255, 255, 255, 0.8);
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.image-preview-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.image-preview-container.active .image-preview-overlay {
+  display: block;
+}
+
+.image-preview-overlay.hidden {
+  display: none;
+}
+
+
+これらのコードに対し、「選択された画像に座標データをボックスで表示する機能」を実装してください。
+
+# 座標データの形式に関して
+ここはあなたに相談したい事項でもあるのですが、実はバックエンドエンジニアからもどのような形式にしたいか決めてほしいと言われています。
+今のところ、バックエンドでは、読み込んだ画像データをLayoutperserを使って認識するそうで、lp.Layoutオブジェクトの座標を可能であればデータとして取り扱いたいと思っています。
+
+# 座標データを用いて表示するボックスについて
+ボックスの見た目について要望をいくつか列挙します。Javascriptなら実現できると思っています。腕の見せ所でしょう。
+- ボックスは、画像上に複数存在する場合がある
+- ボックス内は、画像をそのまま、ボックス外の領域は少々グレーがかかった透明度にする
+- ボックスの枠線は黄色とする
+- ボックスの中心には、どのボックスかを識別するための番号を表示する（①、②、③など）
+- ボックスを選んでいるときは、ボックスの枠線を太めに、そして色をオレンジに変更する（ボックス①、ボックス②、ボックス③があったとして、ボックス①を選んでいるときは枠線をオレンジに変更し、ボックス②、ボックス③は黄色のまま。ここからボックス②を選択したときは、ボックス②をオレンジの枠線に変更し、ボックス①は黄色の枠線に戻る）
+
+それでは、よろしくお願いいたします。
+
+
+ありがとうございます。
+
+# 座標データの形式に関して
+ここはあなたに相談したい事項でもあるのですが、実はバックエンドエンジニアからもどのような形式にしたいか決めてほしいと言われています。
+ちなみに、バックエンドでは、読み込んだ画像データをLayoutperserを使って以下のように認識する（まだサンプルコードですが）と、エンジニアから教えていただきました。
+このlabel_mapというのが、座標データの形式に該当しますか？
+~~~
+model = lp.Detectron2LayoutModel(
+            config_path ='lp://PubLayNet/faster_rcnn_R_50_FPN_3x/config', # In model catalog
+            label_map   ={0: "Text", 1: "Title", 2: "List", 3:"Table", 4:"Figure"}, # In model`label_map`
+            extra_config=["MODEL.ROI_HEADS.SCORE_THRESH_TEST", 0.8] # Optional
+        )
+# model.detect(image)
+layout = model.detect(image)
+~~~
+
+# 座標データを用いて表示するボックスについて
+要望をいくつか列挙します。Javascriptなら実現できると思っています。腕の見せ所でしょう。
+- ボックスは、画像上に複数存在する場合がある
+- ボックス内は、画像をそのまま、ボックス外の領域は少々グレーがかかった透明度にする
+- ボックスの枠線は黄色とする
+- ボックスの中心には、どのボックスかを識別するための番号を表示する（①、②、③など）
+- ボックスを選んでいるときは、ボックスの枠線を太めに、そして色をオレンジに変更する（ボックス①、ボックス②、ボックス③があったとして、ボックス①を選んでいるときは枠線をオレンジに変更し、ボックス②、ボックス③は黄色のまま。ここからボックス②を選択したときは、ボックス②をオレンジの枠線に変更し、ボックス①は黄色の枠線に戻る）
