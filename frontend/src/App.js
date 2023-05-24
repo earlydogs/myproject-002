@@ -6,6 +6,7 @@ function App() {
   const [isPreviewVisible, setIsPreviewVisible] = useState(false);
   const [boxes, setBoxes] = useState([]);
   const imageRef = useRef();
+  const [selectedBox, setSelectedBox] = useState(null);
 
   const handleChange = (e) => {
     const file = e.target.files[0];
@@ -77,14 +78,24 @@ function App() {
                   className="box"
                   style={{
                     position: 'absolute',
-                    border: '1px solid white',
+                    border: box.id === selectedBox ? '2px solid orange' : '2px solid yellow',
                     left: `${box.x}px`,
                     top: `${box.y}px`,
                     width: `${box.width}px`,
                     height: `${box.height}px`,
-                    border: '2px solid yellow'
                   }}
-                />
+                  onClick={() => setSelectedBox(box.id)}
+                >
+                  <p style={{
+                    position: 'absolute',
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    margin: '0',
+                    color: 'white',
+                    fontSize: '20px',
+                  }}>{box.id + 1}</p>
+                </div>
               ))}
             </div>
             <button type="button" onClick={handleReset} className="close-button">

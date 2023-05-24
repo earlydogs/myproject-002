@@ -91,5 +91,9 @@
 .box {
   box-sizing: border-box;
   z-index: 1;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
