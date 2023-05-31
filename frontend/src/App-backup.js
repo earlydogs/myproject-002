@@ -6,6 +6,7 @@ function App() {
   const [isPreviewVisible, setIsPreviewVisible] = useState(false);
   const [windowDimensions, setWindowDimensions] = useState(getWindowDimensions());
   const canvasRef = useRef(null);
+  const contextRef = useRef(null);
 
   function getWindowDimensions() {
     const { innerWidth: width, innerHeight: height } = window;
@@ -43,6 +44,23 @@ function App() {
       }
     }
   };
+
+  const drawBox = (event) => {
+    const { offsetX, offsetY } = event.nativeEvent;
+    contextRef.current.beginPath();
+    contextRef.current.rect(offsetX, offsetY, 100, 100); // 100x100 is a placeholder
+    contextRef.current.stroke();
+  }
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (canvas) {
+      const context = canvas.getContext('2d');
+      context.strokeStyle = 'red'; // Change the box color here
+      context.lineWidth = 2; // Change the line width here
+      contextRef.current = context;
+    }
+  }, []);
 
   useEffect(() => {
     function handleResize() {
@@ -103,7 +121,7 @@ function App() {
         {isPreviewVisible && (
           <div className="image-preview-overlay">
             <div className="image-preview-container">
-              <canvas ref={canvasRef} />
+              <canvas ref={canvasRef} onClick={drawBox} />
             </div>
             <button type="button" onClick={handleReset} className="close-button">
               <i className="material-icons">close</i>
